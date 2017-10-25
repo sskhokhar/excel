@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="EN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sheet Reader</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.3/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    <style>
+        ul,
+        ul li {
+            list-style: none;
+            display: inline-block;
+            margin: 0 0px;
+        }
+        
+        ul {
+            padding-left: 0;
+        }
+        
+        #tabs li button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <input type="file" id="files" class="form-control-file" id="exampleFormControlFile1">
+                <hr>
+                <div id="content">
+                    Sheets:
+                    <ul id="tabs"></ul>
+                    <div id="main">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="input-group">
+        
+    </div> -->
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.7.7/xlsx.core.min.js"></script>
+    <script>
+        var active = "";
+        var activeIndex = 0;
+        var dataArr = [];
+
+        function handleFile(e) {
+
+            //Get the files from Upload control
+            $("#tabs").empty();
+            var files = e.target.files;
+            var workbook;
+            var i, f;
+            //Loop through files
+            for (i = 0, f = files[i]; i != files.length; ++i) {
+                var reader = new FileReader();
+                var name = f.name;
+                reader.onload = function(e) {
+                    var data = e.target.result;
+
+                    var result;
+                    workbook = XLSX.read(data, {
+                        type: 'binary'
+                    });
+                    var sheet_name_list = workbook.SheetNames;
+                    var html = "";
+                    sheet_name_list.forEach(function(element) {
+                        html += `
+                                 <li><button class="btn btn-primary" id="${element}" onclick="showTable('${element}')">${element}</button></li>
+                                `;
+                        var roa = XLSX.utils.sheet_to_json(workbook.Sheets[element]);
+                        dataArr.push({
+                            name: element,
+                            data: roa
+                        });
+                    }, this);
+                    $("#tabs").append(html);
+                    active = sheet_name_list[0];
+                    console.log(dataArr);
+                };
+                reader.readAsArrayBuffer(f);
+            }
+        }
+
+        function showTable(id) {
+            $('#main').empty();
+            id = id.replace('&', '&amp;');
+            dataArr.forEach(function(obj, index) {
+                if (obj.name == id) {
+                    printTable(id, index);
+                }
+            }, this);
+            console.log(id);
+        }
+
+        function printTable(id, index) {
+            var html = `<div id="${id}_">
+                        <table class="table table-bordered table-hover" id="inner_${id}_">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th scope="col" width="10%">SKU</th>
+                                    <th scope="col" width="15%">Description</th>
+                                    <th scope="col">Case Pack</th>
+                                    <th scope="col">Package Size</th>
+                                    <th scope="col">Cost</th>
+                                    <th scope="col">Unit</th>
+                                    <th scope="col" width="11%">Unit UPC</th>
+                                    <th scope="col" width="11%">Inner Pack UPC</th>
+                                    <th scope="col" width="11%">Master Case UPC</th>
+                                    <th scope="col">Gross Case Weight (lbs)</th>
+                                    <th scope="col">Case Cube (ft³)</th>
+                                    <th scope="col">Pallet Pattern</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            dataArr[index].data.forEach(function(obj) {
+                if (obj['SKU'] == undefined) {
+                    html += `
+                    <tr>
+                        <td></td>
+                        <td style="background:black;color:white;">${obj['Description']}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                `;
+                } else {
+                    html += `
+                    <tr>
+                        <th scope="row">${obj['SKU']}</th>
+                        <td>${obj['Description']}</td>
+                        <td>${obj['Case Pack']}</td>
+                        <td>${obj['Package Size']}</td>
+                        <td>${obj['Cost']}</td>
+                        <td>${obj['Unit']}</td>
+                        <td>${obj['Unit UPC']}</td>
+                        <td>${obj[" Inner Pack UPC"]}</td>
+                        <td>${obj['Master Case UPC']}</td>
+                        <td>${obj['Gross Case Weight (lbs)']}</td>
+                        <td>${obj['Case Cube (ft³)']}</td>
+                        <td>${obj['Pallet Pattern']}</td>
+                    </tr>
+                `;
+                }
+
+            }, this);
+
+            html += `</tbody>
+                        </table>
+                    </div>`;
+            html = html.replace(/undefined/gi, '');
+
+            $('#main').append(html);
+        }
+        //Change event to dropdownlist
+        $(document).ready(function() {
+            $('#files').change(handleFile);
+
+        });
+    </script>
+</body>
+
+</html>

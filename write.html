@@ -1,0 +1,129 @@
+<html>
+
+<head>
+    <title>File Writer</title>
+</head>
+
+<body>
+    <form id="form">
+        <label for="">Primary SKU #</label>
+        <input type="text" name="primarysku">
+        <br>
+        <label for="">CVS Item #</label>
+        <input type="text" name="cvsitem">
+        <br>
+        <label for="">UPC #</label>
+        <input type="text" name="upc">
+        <br>
+        <label for="">Brand Item Description</label>
+        <input type="text" name="branditemdescription">
+        <br>
+        <label for="">Cs Pk Qty </label>
+        <input type="text" name="cspkqty">
+        <br>
+        <label for="">Size</label>
+        <input type="text" name="size">
+        <br>
+        <label for="">Regular Case Cost</label>
+        <input type="text" name="regularcasecost">
+        <br>
+        <label for="">Regular Unit Cost</label>
+        <input type="text" name="regularunitcost">
+        <br>
+        <label for="">O/I by Case</label>
+        <input type="text" name="oibycase">
+        <br>
+        <label for="">Bill Back by Case</label>
+        <input type="text" name="billbackbycase">
+        <br>
+        <label for="">Unit Cost Before Scan</label>
+        <input type="text" name="unitcostbeforescan">
+        <br>
+        <label for="">Scan By Unit</label>
+        <input type="text" name="scanbyunit">
+        <br>
+        <label for="">Net Unit Cost</label>
+        <input type="text" name="netunitcost">
+        <br>
+        <label for="">AD Oahu</label>
+        <input type="text" name="adoahu">
+        <br>
+        <label for="">Margin Oahu</label>
+        <input type="text" name="marginoahu">
+        <br>
+        <label for="">AD NI</label>
+        <input type="text" name="adni">
+        <br>
+        <label for="">Margin</label>
+        <input type="text" name="margin">
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        $('#form').on('submit', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var cvsitem = form.find('[name=cvsitem]').val();
+            var primarysku = form.find('[name=primarysku]').val();
+            var upc = form.find('[name=upc]').val();
+            var branditemdescription = form.find('[name=branditemdescription]').val();
+            var cspkqty = form.find('[name=cspkqty]').val();
+            var size = form.find('[name=size]').val();
+            var regularcasecost = form.find('[name=regularcasecost]').val();
+            var regularunitcost = form.find('[name=regularunitcost]').val();
+            var oibycase = form.find('[name=oibycase]').val();
+            var billbackbycase = form.find('[name=billbackbycase]').val();
+            var unitcostbeforescan = form.find('[name=unitcostbeforescan]').val();
+            var scanbyunit = form.find('[name=scanbyunit]').val();
+            var netunitcost = form.find('[name=netunitcost]').val();
+            var adoahu = form.find('[name=adoahu]').val();
+            var marginoahu = form.find('[name=marginoahu]').val();
+            var adni = form.find('[name=adni]').val();
+            var margin = form.find('[name=margin]').val();
+            var obj = [];
+            obj.push({
+                "Primary SKU #": cvsitem,
+                "CVS Item #": primarysku,
+                "UPC #": upc,
+                "Brand Item Description": branditemdescription,
+                "Cs Pk Qty": cspkqty,
+                "Size": size,
+                "Regular Case Cost": regularcasecost,
+                "Regular Unit Cost": regularunitcost,
+                "O/I by Case": oibycase,
+                "Bill Back by Case": billbackbycase,
+                "Unit Cost Before Scan": unitcostbeforescan,
+                "Scan By Unit": scanbyunit,
+                "Net Unit Cost": netunitcost,
+                "AD Oahu": adoahu,
+                "Margin Oahu": marginoahu,
+                "AD NI": adni,
+                "Margin": margin
+            });
+
+            console.log(obj);
+            var data = {
+                'data': obj
+            };
+            data = JSON.stringify(data);
+
+            obj = encodeURIComponent(obj);
+            $.ajax({
+                url: "/write",
+                data: data,
+                type: "post",
+                contentType: 'application/json',
+                success: function(result) {
+                    form.trigger("reset");
+                    var html = `
+                    <a href="/download/${result.filename}">Download File</a>
+                    `;
+                    $('body').append(html);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
