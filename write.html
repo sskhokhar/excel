@@ -5,6 +5,7 @@
 </head>
 
 <body>
+    <input type="file" id="files" class="form-control-file" id="exampleFormControlFile1">
     <form id="form">
         <label for="">Primary SKU #</label>
         <input type="text" name="primarysku">
@@ -59,8 +60,10 @@
         <br>
         <button type="submit">Submit</button>
     </form>
+    <div id="download"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
+        var fileName;
         $('#form').on('submit', function(e) {
             e.preventDefault();
             var form = $(this);
@@ -104,7 +107,8 @@
 
             console.log(obj);
             var data = {
-                'data': obj
+                'data': obj,
+                'fileName': fileName
             };
             data = JSON.stringify(data);
 
@@ -119,10 +123,33 @@
                     var html = `
                     <a href="/download/${result.filename}">Download File</a>
                     `;
-                    $('body').append(html);
+                    $('#download').empty();
+                    $('#download').append(html);
                 }
             });
         });
+        $(document).ready(function() {
+            $('#files').change(handleFile);
+        });
+
+        function handleFile(e) {
+            var files = e.target.files;
+            var data = new FormData();
+            data.append("file", files[0]);
+            $.ajax({
+                url: '/upload',
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST',
+                success: function(data) {
+                    fileName = data;
+                }
+            });
+
+        }
     </script>
 </body>
 
